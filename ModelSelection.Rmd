@@ -42,7 +42,7 @@ To be able to run this document, you will need:
 - Rstudio installed on your computer. 
 - The package `learnr` installed: 
 
-```{r rake_setup-1, echo=TRUE, eval=FALSE}
+```{r fake_setup, echo=TRUE, eval=FALSE}
 install.packages('learnr')
 ```
 
@@ -131,7 +131,13 @@ For regression models, it can be shown that the total expected error is the sum 
 $$
 \text{Expected error} =  \text{Var}(\hat{\mathbf{\beta}}) + \big(\text{E}[\hat{\mathbf{\beta}}] - \beta\big)^2
 $$
-Because our goal is to minimize the total error, we want to find a model that balances this *bias-variance tradeoff*: [Bias-variance figure 1](https://en.wikipedia.org/wiki/Bias%E2%80%93variance_tradeoff#/media/File:Bias_and_variance_contributing_to_total_error.svg), [Bias-variance figure 2](https://images.app.goo.gl/w12M4k4z6sJ2Ykkk6). 
+Because our goal is to minimize the total error, we want to find a model that balances this *bias-variance tradeoff*:
+
+![Bias-variance tradeoff: Total error. (credit: https://scott.fortmann-roe.com/docs/BiasVariance.html)](images/Bias_and_variance_contributing_to_total_error.svg)
+
+### Visualizing bias and variance 
+
+![Bias-variance tradeoff: Bullseye (Credit: https://scott.fortmann-roe.com/docs/BiasVariance.html)](images/bullseye.png){width=50%} 
 
 ### Example
 
