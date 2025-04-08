@@ -1,5 +1,5 @@
 ---
-title: "Stats 5100: Model Selection"
+title: "Math3350: Two-sample t procedures for confidence intervals"
 author: "Jesse Wheeler"
 output: 
   learnr::tutorial:
@@ -26,14 +26,14 @@ library(learnr)
 theme_set(theme_bw())
 ```
 
-This interactive document was created using `learnr`. I you would like to follow along on your own computer, you can download this file from my website: 
+This interactive document was created using `learnr`. If you would like to follow along on your own computer, you can download this file from my website: 
 
 [jeswheel.github.io](https://jeswheel.github.io).
 
-Alternatively, you can clone the public GitHub repository that contains this document (jeswheel/usu5100): 
+Alternatively, you can clone the public GitHub repository that contains this document (jeswheel/ISU_ttest): 
 
 ```{git, echo=TRUE, eval=FALSE}
-git clone https://github.com/jeswheel/usu5100.git
+git clone https://github.com/jeswheel/ISU_ttest.git
 ```
 
 To be able to run this document, you will need: 
@@ -51,6 +51,94 @@ If you "`run`" the document in R-Studio, it will download the other packages you
 ## Logistics
 
 * Any questions about previous material?  
+
+## Motivation
+
+### Comparing samples from two populations
+
+We often have data (or samples) collected on two distinct populations or treatments. 
+Our goal is to use samples to compare the sames from these independent groups. 
+
+### Some examples: 
+  
+  - Researchers used an animal model to examine the long-term impact of exposure to *tricolosan*, a broad-spectrum antimicrobial agent commonly added to soaps. They randomly assigned mice to diets containing either $0.08\%$ triclosan or no triclosan for eight months, then compared the liver weights in each group. 
+     - The response variable for each group $X_1$ (treatment), $X_0$ (control) is liver weight. 
+  - TODO: Change this. It's more of proportions than means. In the 1950's, Researchers want to learn about the effectiveness of polio vaccines. They randomly assigned students from the same schools and ages to control and treatment groups. Children in the control group receive a placebo, and those in the control group receive a polio vaccine. 
+  After a few years, data were collected to evaluate the total number of polio infections in each group. 
+     - The response variable for each group $X_i$ is total number of polio cases.
+
+### Plotting the response variable   
+
+One way to compare groups is plot them. 
+For instance, we could consider doing histograms, boxplots, or dotplots. 
+Below is an example of comparing samples using boxplots.
+
+```{r echo=FALSE}
+set.seed(123)
+x1 <- rnorm(n = 50, mean = 1.45, sd = 1.6)
+x2 <- rnorm(n = 45, mean = 2.1, sd = 1.3)
+df1 <- data.frame(
+  x = c(x1, x2), 
+  group = c(rep("Control", length(x1)), rep('Treatment', length(x2))),
+  set = "Scenario 2"
+)
+
+x3 <- rnorm(n = 50, mean = 1, sd = 1.3)
+x4 <- rnorm(n = 45, mean = 2.75, sd = 1.2)
+df2 <- data.frame(
+  x = c(x3, x4), 
+  group = c(rep('Control', length(x3)), rep('Treatment', length(x4))),
+  set = 'Scenario 1'
+)
+
+# x5 <- rnorm(n = 50, mean = 1.6, sd = 1.3)
+# x6 <- rnorm(n = 45, mean = 1.75, sd = 1.3)
+# df3 <- data.frame(
+#   x = c(x5, x6), 
+#   group = c(rep(1, length(x5)), rep(2, length(x6))),
+#   set = 'Scenario 3'
+# )
+
+x7 <- rnorm(n = 50, mean = 1.65, sd = 1.4)
+x8 <- rnorm(n = 45, mean = 1.65, sd = 1.4)
+df4 <- data.frame(
+  x = c(x7, x8), 
+  group = c(rep('Control', length(x7)), rep('Treatment', length(x8))),
+  set = 'Scenario 3'
+)
+
+df <- bind_rows(df1, df2, df4)
+ggplot(df, aes(group = group, y = x, x = group)) + 
+  geom_boxplot() + 
+  facet_wrap(~set, nrow = 1) + 
+  theme_bw() + 
+  theme(axis.title.x = element_blank()) + 
+  ylab("Response Variable (X)")
+```
+
+- In Scenario 1, the samples are different enough that we can clearly see a difference between the groups. 
+- In Scenario 2, we can still see a difference, but the difference not as obvious. 
+- In Scenario 3, the plots are not the exact same, but we only have a finite sample. Are we sure the populations are really that different? 
+
+**Question:** What is the problem with making scientific conclusions using figures like those above? 
+ 
+## Two-sample t procedures.
+
+Ideally, we would have a theoretically supported, objective method for comparing group means. 
+A class of approaches that satisfy these ideals in practice is ``Two-sample $t$ procedures". 
+
+In what follows, we suppose there are two groups of interest, Group 1 and Group 2, and that we have obtained samples of some response variable for each of these groups. 
+
+- We denote $\bar{X}_1$ and $\bar{X}_2$ be the sample mean of the response variables for the respective groups, 
+- Similarly, $s_1$ and $s_2$ are the sample standard deviations. 
+
+| Population | Mean    | SD         | Sample Mean | Sample SD |
+| ---------- | ------- | ---------- | ----------- | --------- | 
+| 1          | $\mu_1$ | $\sigma_1$ | $\bar{X}_1$ | $s_1$     |
+| 2          | $\mu_2$ | $\sigma_2$ | $\bar{X}_2$ | $s_2$     |
+
+
+## OLD MATERIAL
 
 ## Motivation 
 
@@ -707,4 +795,9 @@ predict_k <- predict(mod_k, newdata = df_test)
 mse_k <- mean((predict_k - df_test$mpg)^2)
 mse_results <- c(mse_results, mse_k)
 ```
+
+<!-- ## Practice Problems  -->
+
+<!-- An economist wishes to relate the speed with which a particular insurance innovation is adopted ($Y$ , in months) to the size of the insurance firm ($X1$, in millions of dollars) and the type of firm ($X2$, either mutual (0) or stock firms (1)). -->
+
 

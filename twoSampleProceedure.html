@@ -15,7 +15,7 @@
 <meta name="allow-skip" content="false" />
 <meta name="learnr-version-prerender" content="0.11.5" />
 
-<title>Stats 5100: Model Selection</title>
+<title>Math3350: Two-sample t procedures for confidence intervals</title>
 
 <!-- header-includes START -->
 <!-- HEAD_CONTENT -->
@@ -112,13 +112,13 @@ if (window.hljs) {
 
 <div id="section-set-up" class="section level2">
 <h2>Set up</h2>
-<p>This interactive document was created using <code>learnr</code>. I
+<p>This interactive document was created using <code>learnr</code>. If
 you would like to follow along on your own computer, you can download
 this file from my website:</p>
 <p><a href="https://jeswheel.github.io">jeswheel.github.io</a>.</p>
 <p>Alternatively, you can clone the public GitHub repository that
-contains this document (jeswheel/usu5100):</p>
-<pre class="git"><code>git clone https://github.com/jeswheel/usu5100.git</code></pre>
+contains this document (jeswheel/ISU_ttest):</p>
+<pre class="git"><code>git clone https://github.com/jeswheel/ISU_ttest.git</code></pre>
 <p>To be able to run this document, you will need:</p>
 <ul>
 <li>A recent version of <code>R</code> installed on your computer.</li>
@@ -136,6 +136,109 @@ the other packages you will need for you.</p>
 </ul>
 </div>
 <div id="section-motivation" class="section level2">
+<h2>Motivation</h2>
+<div id="section-comparing-samples-from-two-populations"
+class="section level3">
+<h3>Comparing samples from two populations</h3>
+<p>We often have data (or samples) collected on two distinct populations
+or treatments. Our goal is to use samples to compare the sames from
+these independent groups.</p>
+</div>
+<div id="section-some-examples" class="section level3">
+<h3>Some examples:</h3>
+<ul>
+<li>Researchers used an animal model to examine the long-term impact of
+exposure to <em>tricolosan</em>, a broad-spectrum antimicrobial agent
+commonly added to soaps. They randomly assigned mice to diets containing
+either <span class="math inline">\(0.08\%\)</span> triclosan or no
+triclosan for eight months, then compared the liver weights in each
+group.
+<ul>
+<li>The response variable for each group <span
+class="math inline">\(X_1\)</span> (treatment), <span
+class="math inline">\(X_0\)</span> (control) is liver weight.</li>
+</ul></li>
+<li>TODO: Change this. It’s more of proportions than means. In the
+1950’s, Researchers want to learn about the effectiveness of polio
+vaccines. They randomly assigned students from the same schools and ages
+to control and treatment groups. Children in the control group receive a
+placebo, and those in the control group receive a polio vaccine. After a
+few years, data were collected to evaluate the total number of polio
+infections in each group.
+<ul>
+<li>The response variable for each group <span
+class="math inline">\(X_i\)</span> is total number of polio cases.</li>
+</ul></li>
+</ul>
+</div>
+<div id="section-plotting-the-response-variable" class="section level3">
+<h3>Plotting the response variable</h3>
+<p>One way to compare groups is plot them. For instance, we could
+consider doing histograms, boxplots, or dotplots. Below is an example of
+comparing samples using boxplots.</p>
+<p><img src="twoSampleProceedure_files/figure-html/unnamed-chunk-2-1.png" width="624" /></p>
+<ul>
+<li>In Scenario 1, the samples are different enough that we can clearly
+see a difference between the groups.</li>
+<li>In Scenario 2, we can still see a difference, but the difference not
+as obvious.</li>
+<li>In Scenario 3, the plots are not the exact same, but we only have a
+finite sample. Are we sure the populations are really that
+different?</li>
+</ul>
+<p><strong>Question:</strong> What is the problem with making scientific
+conclusions using figures like those above?</p>
+</div>
+</div>
+<div id="section-two-sample-t-procedures." class="section level2">
+<h2>Two-sample t procedures.</h2>
+<p>Ideally, we would have a theoretically supported, objective method
+for comparing group means. A class of approaches that satisfy these
+ideals in practice is ``Two-sample <span
+class="math inline">\(t\)</span> procedures”.</p>
+<p>In what follows, we suppose there are two groups of interest, Group 1
+and Group 2, and that we have obtained samples of some response variable
+for each of these groups.</p>
+<ul>
+<li>We denote <span class="math inline">\(\bar{X}_1\)</span> and <span
+class="math inline">\(\bar{X}_2\)</span> be the sample mean of the
+response variables for the respective groups,</li>
+<li>Similarly, <span class="math inline">\(s_1\)</span> and <span
+class="math inline">\(s_2\)</span> are the sample standard
+deviations.</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th>Population</th>
+<th>Mean</th>
+<th>SD</th>
+<th>Sample Mean</th>
+<th>Sample SD</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td><span class="math inline">\(\mu_1\)</span></td>
+<td><span class="math inline">\(\sigma_1\)</span></td>
+<td><span class="math inline">\(\bar{X}_1\)</span></td>
+<td><span class="math inline">\(s_1\)</span></td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td><span class="math inline">\(\mu_2\)</span></td>
+<td><span class="math inline">\(\sigma_2\)</span></td>
+<td><span class="math inline">\(\bar{X}_2\)</span></td>
+<td><span class="math inline">\(s_2\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="section-old-material" class="section level2">
+<h2>OLD MATERIAL</h2>
+</div>
+<div id="section-motivation-1" class="section level2">
 <h2>Motivation</h2>
 <div id="section-review" class="section level3">
 <h3>Review</h3>
@@ -300,7 +403,7 @@ y_i = f(x_i) + \epsilon_i
 \]</span></p>
 <p>I have simulated such as example in <code>R</code>, saved into an
 object called <code>df_poly</code>.</p>
-<p><img src="ModelSelection_files/figure-html/polyregFig-1.png" width="624" /></p>
+<p><img src="twoSampleProceedure_files/figure-html/polyregFig-1.png" width="624" /></p>
 <p>If I don’t know what this relationship is, I might consider fitting a
 polynomial regression model:</p>
 <p><span class="math display">\[
@@ -308,7 +411,7 @@ y_i = \beta_0 + \beta_1 x_1 + \beta_2 x_2^2 + \ldots + \beta_px_p^p +
 \epsilon_i
 \]</span> The question remains: how many variables should I fit to the
 data?</p>
-<p><img src="ModelSelection_files/figure-html/polyregFigEx-1.png" width="624" /></p>
+<p><img src="twoSampleProceedure_files/figure-html/polyregFigEx-1.png" width="624" /></p>
 </div>
 <div id="section-exercise-fitting-polynomial-regression"
 class="section level3">
@@ -932,6 +1035,8 @@ predict_k &lt;- predict(mod_k, newdata = df_test)
 mse_k &lt;- mean((predict_k - df_test$mpg)^2)
 mse_results &lt;- c(mse_results, mse_k)</code></pre>
 </div>
+<!-- ## Practice Problems  -->
+<!-- An economist wishes to relate the speed with which a particular insurance innovation is adopted ($Y$ , in months) to the size of the insurance firm ($X1$, in millions of dollars) and the type of firm ($X2$, either mutual (0) or stock firms (1)). -->
 <p>
 <script type="application/shiny-prerendered" data-context="server-start">
 if (!require(rmarkdown)) install.packages("rmarkdown", repos = "http://cran.us.r-project.org")
@@ -997,10 +1102,10 @@ learnr:::store_exercise_cache(structure(list(label = "polyreg", global_setup = s
         eval = TRUE, echo = TRUE, results = "markup", tidy = FALSE, 
         tidy.opts = NULL, collapse = FALSE, prompt = FALSE, comment = NA, 
         highlight = FALSE, size = "normalsize", background = "#F7F7F7", 
-        strip.white = TRUE, cache = 0, cache.path = "ModelSelection_cache/html/", 
+        strip.white = TRUE, cache = 0, cache.path = "twoSampleProceedure_cache/html/", 
         cache.vars = NULL, cache.lazy = TRUE, dependson = NULL, 
         autodep = FALSE, cache.rebuild = FALSE, fig.keep = "high", 
-        fig.show = "asis", fig.align = "default", fig.path = "ModelSelection_files/figure-html/", 
+        fig.show = "asis", fig.align = "default", fig.path = "twoSampleProceedure_files/figure-html/", 
         dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
         fig.width = 6.5, fig.height = 4, fig.env = "figure", 
         fig.cap = NULL, fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
@@ -1045,10 +1150,10 @@ learnr:::store_exercise_cache(structure(list(label = "mtcarsExplore", global_set
         tidy = FALSE, tidy.opts = NULL, collapse = FALSE, prompt = FALSE, 
         comment = NA, highlight = FALSE, size = "normalsize", 
         background = "#F7F7F7", strip.white = TRUE, cache = 0, 
-        cache.path = "ModelSelection_cache/html/", cache.vars = NULL, 
+        cache.path = "twoSampleProceedure_cache/html/", cache.vars = NULL, 
         cache.lazy = TRUE, dependson = NULL, autodep = FALSE, 
         cache.rebuild = FALSE, fig.keep = "high", fig.show = "asis", 
-        fig.align = "default", fig.path = "ModelSelection_files/figure-html/", 
+        fig.align = "default", fig.path = "twoSampleProceedure_files/figure-html/", 
         dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
         fig.width = 6.5, fig.height = 4, fig.env = "figure", 
         fig.cap = NULL, fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
@@ -1093,10 +1198,10 @@ learnr:::store_exercise_cache(structure(list(label = "mtcarsPlot", global_setup 
         tidy = FALSE, tidy.opts = NULL, collapse = FALSE, prompt = FALSE, 
         comment = NA, highlight = FALSE, size = "normalsize", 
         background = "#F7F7F7", strip.white = TRUE, cache = 0, 
-        cache.path = "ModelSelection_cache/html/", cache.vars = NULL, 
+        cache.path = "twoSampleProceedure_cache/html/", cache.vars = NULL, 
         cache.lazy = TRUE, dependson = NULL, autodep = FALSE, 
         cache.rebuild = FALSE, fig.keep = "high", fig.show = "asis", 
-        fig.align = "default", fig.path = "ModelSelection_files/figure-html/", 
+        fig.align = "default", fig.path = "twoSampleProceedure_files/figure-html/", 
         dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
         fig.width = 6.5, fig.height = 4, fig.env = "figure", 
         fig.cap = NULL, fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
@@ -1142,10 +1247,10 @@ learnr:::store_exercise_cache(structure(list(label = "mtcarsAnova", global_setup
         tidy = FALSE, tidy.opts = NULL, collapse = FALSE, prompt = FALSE, 
         comment = NA, highlight = FALSE, size = "normalsize", 
         background = "#F7F7F7", strip.white = TRUE, cache = 0, 
-        cache.path = "ModelSelection_cache/html/", cache.vars = NULL, 
+        cache.path = "twoSampleProceedure_cache/html/", cache.vars = NULL, 
         cache.lazy = TRUE, dependson = NULL, autodep = FALSE, 
         cache.rebuild = FALSE, fig.keep = "high", fig.show = "asis", 
-        fig.align = "default", fig.path = "ModelSelection_files/figure-html/", 
+        fig.align = "default", fig.path = "twoSampleProceedure_files/figure-html/", 
         dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
         fig.width = 6.5, fig.height = 4, fig.env = "figure", 
         fig.cap = NULL, fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
@@ -1192,10 +1297,10 @@ learnr:::store_exercise_cache(structure(list(label = "adjR2", global_setup = str
         eval = FALSE, echo = TRUE, results = "markup", tidy = FALSE, 
         tidy.opts = NULL, collapse = FALSE, prompt = FALSE, comment = NA, 
         highlight = FALSE, size = "normalsize", background = "#F7F7F7", 
-        strip.white = TRUE, cache = 0, cache.path = "ModelSelection_cache/html/", 
+        strip.white = TRUE, cache = 0, cache.path = "twoSampleProceedure_cache/html/", 
         cache.vars = NULL, cache.lazy = TRUE, dependson = NULL, 
         autodep = FALSE, cache.rebuild = FALSE, fig.keep = "high", 
-        fig.show = "asis", fig.align = "default", fig.path = "ModelSelection_files/figure-html/", 
+        fig.show = "asis", fig.align = "default", fig.path = "twoSampleProceedure_files/figure-html/", 
         dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
         fig.width = 6.5, fig.height = 4, fig.env = "figure", 
         fig.cap = NULL, fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
@@ -1241,10 +1346,10 @@ learnr:::store_exercise_cache(structure(list(label = "mtcarsAIC", global_setup =
         tidy = FALSE, tidy.opts = NULL, collapse = FALSE, prompt = FALSE, 
         comment = NA, highlight = FALSE, size = "normalsize", 
         background = "#F7F7F7", strip.white = TRUE, cache = 0, 
-        cache.path = "ModelSelection_cache/html/", cache.vars = NULL, 
+        cache.path = "twoSampleProceedure_cache/html/", cache.vars = NULL, 
         cache.lazy = TRUE, dependson = NULL, autodep = FALSE, 
         cache.rebuild = FALSE, fig.keep = "high", fig.show = "asis", 
-        fig.align = "default", fig.path = "ModelSelection_files/figure-html/", 
+        fig.align = "default", fig.path = "twoSampleProceedure_files/figure-html/", 
         dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
         fig.width = 6.5, fig.height = 4, fig.env = "figure", 
         fig.cap = NULL, fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
@@ -1298,10 +1403,10 @@ learnr:::store_exercise_cache(structure(list(label = "stepWise", global_setup = 
         tidy = FALSE, tidy.opts = NULL, collapse = FALSE, prompt = FALSE, 
         comment = NA, highlight = FALSE, size = "normalsize", 
         background = "#F7F7F7", strip.white = TRUE, cache = 0, 
-        cache.path = "ModelSelection_cache/html/", cache.vars = NULL, 
+        cache.path = "twoSampleProceedure_cache/html/", cache.vars = NULL, 
         cache.lazy = TRUE, dependson = NULL, autodep = FALSE, 
         cache.rebuild = FALSE, fig.keep = "high", fig.show = "asis", 
-        fig.align = "default", fig.path = "ModelSelection_files/figure-html/", 
+        fig.align = "default", fig.path = "twoSampleProceedure_files/figure-html/", 
         dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
         fig.width = 6.5, fig.height = 4, fig.env = "figure", 
         fig.cap = NULL, fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
@@ -1346,10 +1451,10 @@ learnr:::store_exercise_cache(structure(list(label = "polyTestSet", global_setup
         eval = FALSE, echo = TRUE, results = "markup", tidy = FALSE, 
         tidy.opts = NULL, collapse = FALSE, prompt = FALSE, comment = NA, 
         highlight = FALSE, size = "normalsize", background = "#F7F7F7", 
-        strip.white = TRUE, cache = 0, cache.path = "ModelSelection_cache/html/", 
+        strip.white = TRUE, cache = 0, cache.path = "twoSampleProceedure_cache/html/", 
         cache.vars = NULL, cache.lazy = TRUE, dependson = NULL, 
         autodep = FALSE, cache.rebuild = FALSE, fig.keep = "high", 
-        fig.show = "asis", fig.align = "default", fig.path = "ModelSelection_files/figure-html/", 
+        fig.show = "asis", fig.align = "default", fig.path = "twoSampleProceedure_files/figure-html/", 
         dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
         fig.width = 6.5, fig.height = 4, fig.env = "figure", 
         fig.cap = NULL, fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
@@ -1411,10 +1516,10 @@ learnr:::store_exercise_cache(structure(list(label = "mtcarsCV", global_setup = 
         eval = TRUE, echo = TRUE, results = "markup", tidy = FALSE, 
         tidy.opts = NULL, collapse = FALSE, prompt = FALSE, comment = NA, 
         highlight = FALSE, size = "normalsize", background = "#F7F7F7", 
-        strip.white = TRUE, cache = 0, cache.path = "ModelSelection_cache/html/", 
+        strip.white = TRUE, cache = 0, cache.path = "twoSampleProceedure_cache/html/", 
         cache.vars = NULL, cache.lazy = TRUE, dependson = NULL, 
         autodep = FALSE, cache.rebuild = FALSE, fig.keep = "high", 
-        fig.show = "asis", fig.align = "default", fig.path = "ModelSelection_files/figure-html/", 
+        fig.show = "asis", fig.align = "default", fig.path = "twoSampleProceedure_files/figure-html/", 
         dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
         fig.width = 6.5, fig.height = 4, fig.env = "figure", 
         fig.cap = NULL, fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
@@ -1439,7 +1544,7 @@ learnr:::store_exercise_cache(structure(list(label = "mtcarsCV", global_setup = 
 <!--/html_preserve-->
 <!--html_preserve-->
 <script type="application/shiny-prerendered" data-context="execution_dependencies">
-{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages","version"]},"class":{"type":"character","attributes":{},"value":["data.frame"]},"row.names":{"type":"integer","attributes":{},"value":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67]}},"value":[{"type":"character","attributes":{},"value":["backports","base","bslib","cachem","checkmate","cli","colorspace","compiler","datasets","digest","dplyr","evaluate","fansi","farver","fastmap","fontawesome","generics","ggplot2","glue","graphics","grDevices","grid","gridExtra","gtable","highr","htmltools","htmlwidgets","httpuv","jquerylib","jsonlite","knitr","labeling","later","lattice","learnr","lifecycle","magrittr","Matrix","methods","mgcv","mime","munsell","nlme","pillar","pkgconfig","promises","R6","Rcpp","rlang","rmarkdown","rprojroot","rstudioapi","sass","scales","shiny","splines","stats","tibble","tidyselect","tools","utf8","utils","vctrs","withr","xfun","xtable","yaml"]},{"type":"character","attributes":{},"value":["1.5.0","4.4.1","0.7.0","1.1.0","2.3.1","3.6.3","2.1-1","4.4.1","4.4.1","0.6.36","1.1.4","0.24.0","1.0.6","2.1.2","1.2.0","0.5.2","0.1.3","3.5.1","1.7.0","4.4.1","4.4.1","4.4.1","2.3","0.3.5","0.11","0.5.8.1","1.6.4","1.6.15","0.1.4","1.8.9","1.48","0.4.3","1.3.2","0.22-6","0.11.5","1.0.4","2.0.3","1.7-0","4.4.1","1.9-1","0.12","0.5.1","3.1-164","1.9.0","2.0.3","1.3.0","2.5.1","1.0.12","1.1.4","2.27","2.0.4","0.16.0","0.4.9","1.3.0","1.8.1.1","4.4.1","4.4.1","3.2.1","1.2.1","4.4.1","1.2.4","4.4.1","0.6.5","3.0.1","0.46","1.8-4","2.3.10"]}]}]}
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages","version"]},"class":{"type":"character","attributes":{},"value":["data.frame"]},"row.names":{"type":"integer","attributes":{},"value":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67]}},"value":[{"type":"character","attributes":{},"value":["backports","base","bslib","cachem","checkmate","cli","colorspace","compiler","datasets","digest","dplyr","evaluate","fansi","farver","fastmap","fontawesome","generics","ggplot2","glue","graphics","grDevices","grid","gridExtra","gtable","highr","htmltools","htmlwidgets","httpuv","jquerylib","jsonlite","knitr","labeling","later","lattice","learnr","lifecycle","magrittr","Matrix","methods","mgcv","mime","munsell","nlme","pillar","pkgconfig","promises","R6","Rcpp","rlang","rmarkdown","rprojroot","rstudioapi","sass","scales","shiny","splines","stats","tibble","tidyselect","tools","utf8","utils","vctrs","withr","xfun","xtable","yaml"]},{"type":"character","attributes":{},"value":["1.5.0","4.4.3","0.7.0","1.1.0","2.3.1","3.6.4","2.1-1","4.4.3","4.4.3","0.6.37","1.1.4","0.24.0","1.0.6","2.1.2","1.2.0","0.5.2","0.1.3","3.5.1","1.8.0","4.4.3","4.4.3","4.4.3","2.3","0.3.6","0.11","0.5.8.1","1.6.4","1.6.15","0.1.4","1.8.9","1.48","0.4.3","1.3.2","0.22-6","0.11.5","1.0.4","2.0.3","1.7-2","4.4.3","1.9-1","0.12","0.5.1","3.1-167","1.9.0","2.0.3","1.3.0","2.5.1","1.0.13-1","1.1.5","2.27","2.0.4","0.16.0","0.4.9","1.3.0","1.8.1.1","4.4.3","4.4.3","3.2.1","1.2.1","4.4.3","1.2.4","4.4.3","0.6.5","3.0.2","0.46","1.8-4","2.3.10"]}]}]}
 </script>
 <!--/html_preserve-->
 </div>
@@ -1453,8 +1558,8 @@ learnr:::store_exercise_cache(structure(list(label = "mtcarsCV", global_setup = 
 
 <!-- begin doc-metadata -->
 <div id="doc-metadata">
-<h1 class="title toc-ignore" style="display:none;">Stats 5100: Model
-Selection</h1>
+<h1 class="title toc-ignore" style="display:none;">Math3350: Two-sample
+t procedures for confidence intervals</h1>
 <h4 class="author"><em>Jesse Wheeler</em></h4>
 </div>
 <!-- end doc-metadata -->
