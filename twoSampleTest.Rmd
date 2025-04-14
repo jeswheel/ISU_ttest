@@ -1,0 +1,593 @@
+---
+title: "Math3350: Two-sample t procedures for confidence intervals"
+author: "Jesse Wheeler"
+date: "`r Sys.Date()`"
+output: beamer_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(latex2exp)
+library(knitr)
+library(kableExtra)
+theme_set(theme_bw())
+```
+
+
+## Logistics
+
+* Any questions about previous material?  
+
+## Motivation
+
+### Comparing samples from two populations
+
+We often have data (or samples) collected on two distinct populations or treatments. 
+Our goal is to use samples to compare the sames from these independent groups. 
+
+## Example 1: 
+  
+  - Researchers used an animal model to examine the long-term impact of exposure to *tricolosan*, a broad-spectrum antimicrobial agent commonly added to soaps. They randomly assigned mice to diets containing either $0.08\%$ triclosan or no triclosan for eight months, then compared the liver weights in each group. 
+     - The response variable for each group $X_1$ (treatment), $X_0$ (control) is liver weight. 
+     
+## Example 2: 
+
+  - Researchers selected a random sample of 682 medical records of California children in the same age group who had received care from the same clinicians on the same day but were not diagnosed with pertussis. 
+  The researchers then compared the length of time since vaccination in both groups.
+     - The response variable for each group $X_i$ is the length of time since vaccination, the factor level $i$ corresponds to pertussis diagnosis. 
+
+## Plotting the response variable   
+
+One way to compare groups is plot them. 
+For instance, we could consider doing histograms, boxplots, or dotplots. 
+Below is an example of comparing samples using boxplots.
+
+```{r echo=FALSE, fig.height=4}
+set.seed(123)
+x1 <- rnorm(n = 50, mean = 1.45, sd = 1.6)
+x2 <- rnorm(n = 45, mean = 2.1, sd = 1.3)
+df1 <- data.frame(
+  x = c(x1, x2), 
+  group = c(rep("Control", length(x1)), rep('Treatment', length(x2))),
+  set = "Scenario 2"
+)
+
+x3 <- rnorm(n = 50, mean = 1, sd = 1.3)
+x4 <- rnorm(n = 45, mean = 2.75, sd = 1.2)
+df2 <- data.frame(
+  x = c(x3, x4), 
+  group = c(rep('Control', length(x3)), rep('Treatment', length(x4))),
+  set = 'Scenario 1'
+)
+
+# x5 <- rnorm(n = 50, mean = 1.6, sd = 1.3)
+# x6 <- rnorm(n = 45, mean = 1.75, sd = 1.3)
+# df3 <- data.frame(
+#   x = c(x5, x6), 
+#   group = c(rep(1, length(x5)), rep(2, length(x6))),
+#   set = 'Scenario 3'
+# )
+
+x7 <- rnorm(n = 50, mean = 1.65, sd = 1.4)
+x8 <- rnorm(n = 45, mean = 1.65, sd = 1.4)
+df4 <- data.frame(
+  x = c(x7, x8), 
+  group = c(rep('Control', length(x7)), rep('Treatment', length(x8))),
+  set = 'Scenario 3'
+)
+
+df <- bind_rows(df1, df2, df4)
+ggplot(df, aes(group = group, y = x, x = group)) + 
+  geom_boxplot() + 
+  facet_wrap(~set, nrow = 1) + 
+  theme_bw() + 
+  theme(axis.title.x = element_blank()) + 
+  ylab("Response Variable (X)")
+```
+
+
+## 
+
+### Scenario 1
+
+The samples are different enough that we can clearly see a difference between the groups. 
+
+### Scenario 2
+
+We can still see a difference, but the difference not as obvious. 
+
+### Scenario 3
+
+The plots are not the exact same, but we only have a finite sample. Are we sure the populations are really that different? 
+
+## Plotting
+
+Plots are useful to help compare the shares, centers, and spreads of the two samples.
+
+**Question:** What is the problem with making scientific conclusions using figures like those above? 
+ 
+## Two-sample t procedures.
+
+### Setup
+
+- Ideally, we would have a theoretically supported, objective method for comparing group means. 
+A class of approaches that satisfy these ideals in practice is ``Two-sample $t$ procedures". 
+
+
+- In what follows, we suppose there are two groups of interest, Group 1 and Group 2, and that we have obtained samples of some response variable for each of these groups. 
+
+## Setup 
+
+- We denote $\bar{X}_1$ and $\bar{X}_2$ be the sample mean of the response variables for the respective groups, 
+- Similarly, $s_1$ and $s_2$ are the sample standard deviations. 
+
+| Population | Mean    | SD         | Sample Mean | Sample SD |
+| ----------:|:-------:|:----------:|:-----------:|:---------:| 
+| 1          | $\mu_1$ | $\sigma_1$ | $\bar{X}_1$ | $s_1$     |
+| 2          | $\mu_2$ | $\sigma_2$ | $\bar{X}_2$ | $s_2$     |
+
+## Unknowns
+
+There are four unknown parameters: population means ($\mu_1$, $\mu_2$), and standard deviations ($\sigma_1, \sigma_2$). 
+
+Our goal is to compare the two population means in a mathematically rigorous way. 
+Specifically, we would like to test the Hypothesis: 
+$$
+H_{0}:\,\,\, \mu_1 =\mu_2,
+$$
+or equivalently, 
+$$
+H_{0}:\,\,\, \mu_1 - \mu_2 = 0
+$$
+against the alternative
+$$
+H_1:\,\,\, \mu_1 - \mu_2 \neq 0,
+$$
+
+or 
+$$
+H_1: \,\,\, \mu_1 - \mu_2 > 0\,\,\,\,\,\,\,\,\,\,\text{or}\,\,\,\,\,\,\,\,\,\,H_1: \,\,\, \mu_1 - \mu_2 < 0
+$$
+
+## Confidence Intervals
+
+There is a duality between hypothesis tests and confidence intervals, meaning that the same sampling distributions used for a hypothesis test can be leveraged for creation of confidence intervals. 
+
+
+Today, we will use this to get a confidence interval for the population value $\mu_1 - \mu_2$. 
+
+## Conditions
+
+T be able to use a two-sample $t$-procedure, we need the following conditions: 
+
+- We have two simple random samples (SRS). This means we need *independence* between observations, or that observations from one sample are unrelated to the observations in the other sample. 
+- Both samples come from *approximately normal* distributions. In practice, it is often enough that the distributions have similar shapes, are roughly symmetric, and have no strong outliers. 
+
+## Sampling Distributions
+
+Recall that $\bar{X}_1$ and $\bar{X}_2$ are only *sample statistics*. Therefore, the difference we actually compute
+$$
+\bar{X}_1 - \bar{X}_2
+$$
+is specific to the independent samples we obtained. A different set of random samples would likely yield a different value for $\bar{X}_1 - \bar{X}_2$. 
+How much the difference can vary from sample to sample is given by its *sampling distribution*. 
+
+While the proof is beyond the scope of this course, it can be shown that the distribution of $\bar{X}_1 - \bar{X}_2$ has a mean $\mu_1 - \mu_2$, and a standard deviation $\sqrt{\frac{\sigma_1^2}{n_1} + \frac{\sigma^2_2}{n_2}}$
+
+**Question**: What can notice about the standard deviation as the number of samples of both factors increases?
+
+
+## t-statistic
+
+###
+
+When both populations are Normally distributed, the sample distributions of $\bar{X}_1$ and $\bar{X}_2$ will also be Normally distributed, and so will their difference $\bar{X}_1 - \bar{X}_2$: 
+$$
+\bar{X}_1 - \bar{X}_2 \sim N\big(\mu_1 - \mu_2, \frac{\sigma_1^2}{n_1} + \frac{\sigma^2_2}{n_2}\big). 
+$$
+
+$\mu_i$ and $\sigma_1$ are unknown. 
+However, we are interested in estimating the difference $\mu_1 - \mu_2$, with our null hypothesis being $\mu_1 - \mu_2 = 0$.
+
+## Approximating standard deviation
+
+In practice, don't know $\sigma_1$ and $\sigma_2$, so we estimate them by the sample standard deviations, $s_1, s_2$. 
+Using these substitutions, the estimated standard deviation is known as the *standard error*:
+$$
+\text{SE} = \sqrt{\frac{s_1^2}{n_1} + \frac{s^2_2}{n_2}}. 
+$$
+
+
+The sample statistic that we are interested in is the standardized version of the sample difference: 
+
+$$
+t = \frac{\big(\bar{X}_1 - \bar{X}_2\big) - (\mu_1 - \mu_2)}{\text{SE}} = \frac{\big(\bar{X}_1 - \bar{X}_2\big) - (\mu_1 - \mu_2)}{ \sqrt{\frac{s_1^2}{n_1} + \frac{s^2_2}{n_2}}}
+$$
+
+We call this the *two-sample $t$ statistic*, and it has approximately a $t$ distribution.
+
+## Degrees of freedom
+
+The degrees of freedom (df) is given by: 
+$$
+\text{df} = \frac{\left(\frac{s_1^2}{n_1} + \frac{s^2_2}{n_2}\right)^2}{\frac{1}{n_1 - 1}\left(\frac{s_1^2}{n_1}\right)^2 + \frac{1}{n_2-1}\left(\frac{s^2_2}{n_2}\right)^2}
+$$
+This is usually a good approximation if the populations are approximately normally distributed and if $n_1$ and $n_2$ are 5 or larger. 
+
+Unlike in the one-sample $t$-test, the $\text{df}$ here depends on both the number of observations $(n_1, n_2)$, and the sample variance $(s^2_1, s^2_2)$. 
+Notably, it's usually not a whole number. 
+
+The exact value is **always** between $\min\{n_1 - 1, n_2 - 1\}$ and $n_1 + n_2 - 2$.
+
+## Confidence Intervals 
+
+Like the one-sample situation, we can use the properties of the $t$-distribution to obtain a confidence interval about the value $\mu_1 - \mu_2$. 
+Specifically, a level-$C$ confidence interval for $\mu_1 - \mu_2$ is given by: 
+$$
+\big(\bar{X}_1 - \bar{X}_2\big) \pm t_C \sqrt{\frac{s^2_1}{n_1} + \frac{s^2_2}{n_2}},
+$$
+where $t_C$ is the critical value with area $C$ between $-t_C$ and $t_C$ under the $t$-density with $df$ degrees of freedom. 
+
+## Example: Daily activity and Obesity. 
+
+###
+
+- In one study, James Levine and collaborators at the Mayo Clinic investigated the link between obesity and daily activity^[Levine, J.A., et al. 2005. Interindividual variation in posture allocation: possible role in human obesity. *Science, 307(5709)*, pp. 584-586]. 
+
+
+
+- In this study, the researchers selected 20 individuals to track their daily activity. 
+They selected 10 individuals who are lean, and 10 that are mildly obese (but still healthy). 
+Sensors were attached to the subjects for 10 days, and recorded their daily movement patterns. 
+The table below shows the number of minutes per data that the subjects spent standing or walking, sitting, and laying down. 
+
+```{r, echo=FALSE, include=FALSE}
+health_df <- read.csv('data/health.txt')
+knitr::kable(
+  health_df, 
+  col.names = c("Health", "Stand / Walk", 'Sit', "Lie")
+  ) 
+# %>% 
+  # kable_styling(full_width = F)
+```
+
+## Plotting the Data
+
+```{r, echo=FALSE, fig.height=2, fig.width=3.5, fig.align='center'}
+health_df %>% 
+  ggplot(aes(x = Health, y = StandWalk)) + 
+  geom_boxplot() + 
+  theme_bw() + 
+  ylab("Stand / Walk (min)") + 
+  theme(axis.title.x = element_blank())
+```
+
+Looking at the data, we do not see any violations of the conditions for performing a two-sample $t$-procedure.
+The figure also shows a difference between the two groups;
+however, there are only 10 observations per group. 
+How sure are we that the difference we see is not just due to random chance?
+
+## Two-sample t-procedures
+
+To do this, we first calculate the sample mean and standard deviations: 
+
+```{r, echo=FALSE}
+mean_lean <- health_df %>% filter(Health == 'Lean') %>% pull(StandWalk) %>% mean() %>% round(3)
+
+mean_obese <- health_df %>% filter(Health == 'Obese') %>% pull(StandWalk) %>% mean() %>% round(3)
+
+sd_lean <- health_df %>% filter(Health == 'Lean') %>% pull(StandWalk) %>% sd() %>% round(3)
+
+sd_obese <- health_df %>% filter(Health == 'Obese') %>% pull(StandWalk) %>% sd() %>% round(3)
+
+health_df %>% 
+  group_by(Health) %>% 
+  summarize(
+    x_bar = round(mean(StandWalk), 3),
+    s = round(sd(StandWalk), 3)
+  ) %>%
+  knitr::kable(
+    col.names = c("Health", "$\\bar{X}$", '$s$')
+  ) 
+# %>% 
+  # kable_styling(full_width = F)
+```
+
+
+## Degrees of Freedom (df)
+
+Using this data, we can calculate the degrees of freedom (df) using the formula provided above. 
+
+\begin{align*}
+\text{df} &= \frac{\left(\frac{s_1^2}{n_1} + \frac{s^2_2}{n_2}\right)^2}{\frac{1}{n_1 - 1}\left(\frac{s_1^2}{n_1}\right)^2 + \frac{1}{n_2-1}\left(\frac{s^2_2}{n_2}\right)^2} \\
+&= \frac{\left(\frac{`r sd_lean`^2}{10} + \frac{`r sd_obese`^2}{10}\right)^2}{\frac{1}{9}\left(\frac{`r sd_lean`^2}{10}\right)^2 + \frac{1}{9}\left(\frac{`r sd_obese`^2}{10}\right)^2}\\
+&\approx `r round( (((sd_lean^2)/10 + (sd_obese^2)/10)^2) / ((((sd_lean^2)/10)^2)/9 + (((sd_obese^2)/10)^2)/9), 0)`
+\end{align*}
+
+## t-statistic
+
+Now using the null-hypothesis that $\mu_1 = \mu_2$, we can calculate the $t$-statistic as: 
+
+\begin{align*}
+  t &= \frac{\bar{X}_1 - \bar{X}_2}{ \sqrt{\frac{s_1^2}{n_1} + \frac{s^2_2}{n_2}}} \\
+  &= \frac{`r mean_lean` - `r mean_obese`}{ \sqrt{\frac{`r sd_lean`^2}{10} + \frac{`r sd_obese`^2}{10}}} \\
+  &= `r round( (mean_lean - mean_obese) / (sqrt( (sd_lean^2)/10 + (sd_obese^2)/10 )), 3)`
+\end{align*}
+
+## P-value
+
+Below we plot the calculated $t$ value compared to the theoretical sampling distribution under the null hypothesis: 
+
+```{r echo=FALSE, fig.height=2.75, fig.width=4.25, fig.align='center'}
+# Calculate the critical value to which you want to plot
+# critical_value <- qt(p = .95, df = 15)
+critical_value <- 3.808
+# Generate some values on the x-axis from -5 to the critical value
+xs <- seq(to = 5, from = critical_value, length.out = 1000)
+# Calculate the assocated density of the x-axis values
+ys <- dt(x = xs, df = 15)
+# Plot the curve
+curve(dt(x, df = 15), from = -5, to = 5, main = "t-distribution with DF=15", xlab = '', ylab = '')
+# Plot the shading
+polygon(c(critical_value, xs, 5), c(0, ys, 0), col = 'grey')
+abline(v = critical_value, lty = 2)
+```
+
+As we can see, there is a very small chance that we would observe something as extreme as we did if the means were equal. 
+
+## P-value (cont.)
+
+We can calculate this probability, called the $P$-value, which is the area to the right of the dashed line (if a one-sided test), or twice this area (if a two-sided test). 
+
+```{r, echo=FALSE}
+out.t <- t.test(health_df %>% filter(Health == 'Lean') %>% pull(StandWalk), health_df %>% filter(Health == 'Obese') %>% pull(StandWalk), alternative = 'greater')
+```
+
+The corresponding $P$-value can be calculated using software, in which case we get:
+
+$$
+P\text{-value} = `r round(out.t$p.value, 4) |> format(scientific = FALSE)`
+$$
+
+## Using a t-table
+
+Using a $t$-statistic table from the textbook, we can approximate the $P$-value by finding the lower and upper bounds of the value: 
+
+```{r, echo=FALSE}
+tmp <- data.frame('name' = c("$t$-statistic", "One-Sided $P$"), x1 = c(3.733, 0.001), x2 = c(4.073, 0.005))
+knitr::kable(tmp, col.names = c("DF = 15", "", "")) 
+# %>%
+  # kable_styling(full_width = F)
+```
+
+<!--  -->
+<!-- |:--------------|---------:|---------:| -->
+<!-- | $t$-value     | 3.733    | 4.073    | -->
+<!-- | one-sided $P$ | 0.001    | 0.0005   | -->
+
+Our $t$-statistic (`r round( (mean_lean - mean_obese) / (sqrt( (sd_lean^2)/10 + (sd_obese^2)/10 )), 3)`) was calculated to be between $3.733$ and $4.072$, meaning the $P$-value must be between $0.001$ and $0.0005$. 
+While the table doesn't provide us with the exact value, this is not critical for our conclusions. What relly matters is the order of magnitude of the $P$-value, not it's exact value.
+
+## Conclusions
+
+What we have found is a statistically significant difference between the two samples. 
+
+### Limitations: 
+
+- The findings come from an observational study, meaning we don't have a causal interpretation. 
+- We don't know for certain that $\mu_{\text{lean}} > \mu_{\text{obese}}$; we only have found evidence of this with our specific sample. 
+
+## Confidence Interval 
+
+A confidence interval for $\mu_{\text{lean}} - \mu_{\text{obese}}$ is a better way to assess *how much* do lean individuals have higher activity rates than mildly obese individuals. 
+
+We want to obtain a $95\%$ confidence interval for the difference in mean time spent walking or standing between the two populations. 
+Recall from our previous calculations, we have the following estimates: 
+
+- $\bar{X}_{\text{Lean}} - \bar{X}_{\text{obese}} = `r mean_lean - mean_obese`$
+- $\text{SE} = 40.039$
+- $\text{DF} = 15.17 \approx 15$. 
+
+## Calculating the critical value
+
+For confidence intervals, we need to calculate the critical value for a $t$-distribution with the correct degrees of freedom.
+If we approximate $\text{df} = 15$, the critical value for a $95\%$ confidence interval is 
+
+$$
+t_{95\%} = `r round(qt(0.975, 15), 3)`,
+$$
+and the confidence interval can be evaluated as:
+
+\begin{align}
+\text{CI: }&\,\, \big(\bar{X}_1 - \bar{X}_2\big) \pm t_{95\%} \sqrt{\frac{s^2_1}{n_1} + \frac{s^2_2}{n_2}} \\
+\text{CI: }&\,\, `r mean_lean - mean_obese` \pm `r round(qt(0.975, 15), 3)` \times 40.039 \\
+\text{CI: }&\,\, \big(`r ((mean_lean - mean_obese) - round(qt(0.975, 15), 3) * 40.039) |> round(3) |> format(scientific = FALSE)`, `r ((mean_lean - mean_obese) + round(qt(0.975, 15), 3) * 40.039) |> round(3) |> format(scientific = FALSE)`\big)
+\end{align}
+
+## Interpretation
+
+The difference in mean daily standing/walking times between the two groups is estimated to be on the order of one to four hours. 
+The confidence interval is very wide because (1) the populations are small, and (2) the sample standard deviations are large. The variability of individuals is something we cannot control, but we could obtain tighter confidence intervals if we sampled more data. 
+
+## Example: Transgenic Chickens
+
+Infection of chickens with the avian flu is a threat to poultry production and human health.
+A research team created transgenic chickens that are resistant to infection, but would like to know if the modification also affects chicken sizes. 
+The researchers compared the hatching weights (in grams) of 45 transgenic chickens to 54 standard chickens of the same breed. 
+
+## Data
+
+```{r, echo=FALSE}
+chickens <- read.csv('data/chickens.txt')
+```
+
+```{r, echo=FALSE}
+transgenic <- chickens %>% filter(type == 'transgenic') %>% pull(weight)
+
+commercial <- chickens %>% filter(type == 'commercial') %>% pull(weight)
+
+table_content <- data.frame(
+  Group = c('Transgenic', 'Commercial'),
+  Observations = c(paste(transgenic, collapse = ", "), paste(commercial, collapse = ", "))
+)
+
+kable(table_content, format = "html", escape = FALSE, table.attr = "style='width:100%'",col.names = NULL) 
+# %>% 
+  # kable_styling()
+```
+
+## Goal
+
+As before, we are interested in testing the hypothesis $H_0: \,\, \mu_{\text{transgenic}} \neq \mu_{\text{commercial}}$, and finding a $95\%$ confidence interval for $\mu_{\text{transgenic}} - \mu_{\text{commercial}}$
+
+## Plot
+
+```{r, echo=FALSE, fig.height=2.75, fig.width=4,fig.align='center'}
+chickens %>% 
+  ggplot(aes(x = type, y = weight)) + 
+  geom_boxplot() + 
+  theme_bw() + 
+  theme(axis.title.x = element_blank()) + 
+  ylab("Hatchling Weight (g)")
+```
+
+## Sample Statistics
+
+The first step is to calculate the sample statistics: 
+
+```{r echo=FALSE}
+mean_trans <- chickens %>% filter(type == 'transgenic') %>% pull(weight) %>% mean() %>% round(3)
+
+mean_commer <- chickens %>% filter(type == 'commercial') %>% pull(weight) %>% mean() %>% round(3)
+
+sd_trans <- chickens %>% filter(type == 'transgenic') %>% pull(weight) %>% sd() %>% round(3)
+
+sd_commer <- chickens %>% filter(type == 'commercial') %>% pull(weight) %>% sd() %>% round(3)
+
+out.t <- t.test(chickens %>% filter(type == 'transgenic') %>% pull(weight), chickens %>% filter(type == 'commercial') %>% pull(weight))
+
+
+n_trans <- chickens %>% filter(type == 'transgenic') %>% summarize(n = n()) %>% pull(n) %>% as.integer()
+
+n_commer <- chickens %>% filter(type == 'commercial') %>% summarize(n = n()) %>% pull(n)
+
+chickens %>% 
+  mutate(type = gsub('(^[[:alpha:]])', '\\U\\1', type, perl = TRUE)) %>%
+  group_by(type) %>% 
+  summarize(
+    x_bar = round(mean(weight), 3),
+    s = round(sd(weight), 3)
+  ) %>%
+  knitr::kable(
+    col.names = c("Type", "$\\bar{X}$", '$s$')
+  ) 
+# 
+# %>% 
+#   kable_styling(full_width = F)
+```
+
+## t-statistic
+
+The $t$-statistic is calculated as
+
+\begin{align*}
+  t &= \frac{\bar{X}_1 - \bar{X}_2}{ \sqrt{\frac{s_1^2}{n_1} + \frac{s^2_2}{n_2}}} \\
+    &= \frac{`r round(mean_trans, 2)` - `r round(mean_commer, 2)`}{ \sqrt{\frac{`r round(sd_trans, 2)`^2}{`r n_trans`} + \frac{`r round(sd_commer, 2)`^2}{`r n_commer`}}} = `r round(out.t$statistic, 2)`
+\end{align*}
+
+## Degrees of Freedom (df)
+
+The degrees of freedom are calculated as
+
+\begin{align*}
+\text{df} &= \frac{\left(\frac{s_1^2}{n_1} + \frac{s^2_2}{n_2}\right)^2}{\frac{1}{n_1 - 1}\left(\frac{s_1^2}{n_1}\right)^2 + \frac{1}{n_2-1}\left(\frac{s^2_2}{n_2}\right)^2} \\
+&= \frac{\left(\frac{`r round(sd_trans, 2)`^2}{`r n_trans`} + \frac{`r round(sd_commer, 2)`^2}{`r n_commer`}\right)^2}{\frac{1}{`r n_trans - 1L`}\left(\frac{`r round(sd_trans, 2)`^2}{`r n_trans`}\right)^2 + \frac{1}{`r n_commer - 1L`}\left(\frac{`r round(sd_commer, 2)`^2}{`r n_commer`}\right)^2} = `r round( (((sd_trans^2)/n_trans + (sd_commer^2)/n_commer)^2) / ((((sd_trans^2)/n_trans)^2)/(n_trans-1) + (((sd_commer^2)/n_commer)^2)/(n_commer - 1)), 1)` 
+\end{align*}
+
+## P-value
+
+In this case, the $t$-statistic we calculated is very small. 
+Using statistical software, the two-sided $P$-value from this sampling distribution is calcated to be: 
+
+$$
+P\text{-Value}= `r round(out.t$p.value, 2)`,
+$$
+
+## P-value (cont.)
+
+```{r, fig.height=2.75, fig.width=3.5, fig.align='center'}
+# Calculate the critical value to which you want to plot
+df <- round( (((sd_trans^2)/n_trans + (sd_commer^2)/n_commer)^2) / ((((sd_trans^2)/n_trans)^2)/(n_trans-1) + (((sd_commer^2)/n_commer)^2)/(n_commer - 1)), 1)
+
+critical_value <- round(out.t$statistic, 2)
+# Generate some values on the x-axis from -5 to the critical value
+xs1 <- seq(from = -5, to = -critical_value, length.out = 1000)
+xs2 <- seq(to = 5, from = critical_value, length.out = 1000)
+# Calculate the assocated density of the x-axis values
+ys1 <- dt(x = xs1, df = df)
+ys2 <- dt(x = xs2, df = df)
+# Plot the curve
+curve(dt(x, df = df), from = -5, to = 5, main = paste0("t-distribution with df = ", df), xlab = '', ylab = '')
+# Plot the shading
+polygon(c(critical_value, xs2, 5), c(0, ys2, 0), col = 'grey')
+polygon(c(-5, xs1, -critical_value), c(0, ys1, 0), col = 'grey')
+```
+
+This result shows that there is not strong evidence that there is a difference between mean weights from the two distinct populations.
+
+## Confidence Interval
+
+The corresponding $95\%$ confidence interval can be calculated using a critical value of 
+
+$$
+t_{95\%} = `r round(qt(0.975, df), 3)`,
+$$
+
+which was calculated using statistical software. The $95\%$ confidence interval is therefore given by
+
+\begin{align}
+\text{CI: }&\,\, \big(\bar{X}_1 - \bar{X}_2\big) \pm t_{95\%} \sqrt{\frac{s^2_1}{n_1} + \frac{s^2_2}{n_2}} \\
+\text{CI: }&\,\, `r round(mean_trans, 2) - round(mean_commer, 2)` \pm `r round(qt(0.975, df), 3)` \times `r round(out.t$stderr, 3)` \\
+\text{CI: }&\,\, \big(`r ((mean_trans - mean_commer) - round(qt(0.975, df), 3) * out.t$stderr) |> round(2) |> format(scientific = FALSE)`, `r ((mean_trans - mean_commer) + round(qt(0.975, df), 3) * out.t$stderr) |> round(2) |> format(scientific = FALSE)`\big)
+\end{align}
+
+Therefore $\mu_{\text{transgenic}} - \mu_{\text{commercial}}$ could be negative, positive, or zero. 
+
+## Pooled two-sample t-proceedures
+
+In the $t$-procedures discussed above, we allow for the estimation of distinct population standard deviations, $\sigma_1$ and $\sigma_2$. 
+This is known as *unpooled* $t$-procedures, or sometimes the *Welch's* $t$-procedure. 
+
+## Pooled standard deviation estimates
+
+An alternative approach would be to assume that the populations have the same standard deviation, $\sigma_1 = \sigma_2 = \sigma$. 
+This is known as *pooled* $t$-procedures, and in this case we combine the sample standard deviations for each group ($s_1, s_2$) in order to get a single estimate of the population standard deviation $s_p$: 
+
+$$
+s_p = \sqrt{\frac{(n_1 - 1)s^2_1 + (n_2 - 1)s^2_2}{n_1 + n_2 - 2}}.
+$$
+
+## Pooled t-statistic
+
+Using the equal (or pooled) estimate of the standard deviation, the $t$-statistic can be calculated as:
+
+$$
+t_{\text{pooled}} = \frac{\big(\bar{X}_1 - \bar{X}_2\big) - (\mu_1 - \mu_2)}{s_p\sqrt{\frac{1}{n_1} + \frac{1}{n_2}}},
+$$
+with degrees of freedom: 
+
+$$
+\text{df} = n_1 + n_2 - 2.
+$$
+
+## Which Test should I use? 
+
+Most software packages offer a choice of two-sample $t$-statistics using either *unequal* or *equal* population variances. 
+Which test should we chose to use? Here are a few considerations: 
+
+- The *unequal* test is valid whether or not the population variances are equal, whereas the *equal* test can be unreliable if the variances are not actually equal. 
+- The *equal* variance procedure is more simple to calculate by hand, but we typically have software available to calculate the *unequal* version. 
+- Simulation studies suggest that if the population variances are not exactly equal (as they often are not in real datasets), then the *unequal* test gives more reliable estimates. 
+- If the sample size is small, *and* the variances of the two groups are equal, the *equal* variance procedures can be better. **However**, in practice we cannot know if the population variances are equal. 
+
